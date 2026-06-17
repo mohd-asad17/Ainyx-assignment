@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+.slider {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+  }
+  
+  .slider::-webkit-slider-runnable-track {
+    background: transparent;
+  }
+  
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+  
+    width: 18px;
+    height: 18px;
+  
+    border-radius: 9999px;
+  
+    background: white;
+  
+    border: 2px solid #18181b;
+  
+    cursor: pointer;
+  
+    margin-top: -2px;
+  
+    position: relative;
+    z-index: 10;
+  }
+  
+  .slider::-moz-range-track {
+    background: transparent;
+  }
+  
+  .slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+  
+    border-radius: 9999px;
+  
+    background: white;
+  
+    border: 2px solid #18181b;
+  
+    cursor: pointer;
+  }
