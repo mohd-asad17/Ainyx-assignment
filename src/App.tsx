@@ -69,7 +69,7 @@ export default function App() {
       try {
         setLoading(true);
   
-        const graph = await getAppGraph(appId);
+        await getAppGraph(appId);
   
         setNodes([]);
 setEdges([]);
