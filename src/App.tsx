@@ -10,6 +10,8 @@ import {
   type EdgeChange,
   type Node,
   type Edge,
+  addEdge,
+  type Connection,
 } from "@xyflow/react";
 import type { NodeTypes } from "@xyflow/react";
 
@@ -69,8 +71,8 @@ export default function App() {
   
         const graph = await getAppGraph(appId);
   
-        setNodes(graph.nodes);
-        // setEdges(graph.edges);
+        setNodes([]);
+setEdges([]);
       } catch (err) {
         console.error(err);
       } finally {
@@ -92,6 +94,13 @@ export default function App() {
   const onEdgesChange = useCallback(
     (changes: EdgeChange[]) => {
       setEdges((eds) => applyEdgeChanges(changes, eds));
+    },
+    []
+  );
+
+  const onConnect = useCallback(
+    (connection: Connection) => {
+      setEdges((eds) => addEdge(connection, eds));
     },
     []
   );
@@ -147,6 +156,21 @@ export default function App() {
         nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        connectionLineStyle={{
+          strokeWidth: 2,
+        }}
+        defaultViewport={{
+          x: 0,
+          y: 0,
+          zoom: 0.7,
+        }}
+        minZoom={0.3}
+        maxZoom={2}
+        fitViewOptions={{
+          maxZoom: 1,
+          padding: 0.2,
+        }}
         fitView
         colorMode={theme}
       >
