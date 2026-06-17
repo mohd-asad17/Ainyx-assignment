@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { NodeProps } from "@xyflow/react";
+import type { Node, NodeProps } from "@xyflow/react";
 import { Handle, Position } from "@xyflow/react";
 
 import {
@@ -12,8 +12,30 @@ import {
   Boxes,
 } from "lucide-react";
 
+export type ServiceType =
+  | "postgres"
+  | "redis"
+  | "mongodb"
+  | "generic";
 
+  export type ServiceStatus =
+  | "Success"
+  | "degraded"
+  | "Error";
 
+export type ServiceNodeData = {
+  label: string;
+  service: ServiceType;
+  status: ServiceStatus;
+  value: number;
+  resource: "CPU" | "Memory" | "Disk" | "Region";
+  pricePerHour: number;
+  description: string;
+};
+
+export type ServiceNodeType =
+  Node<ServiceNodeData, "service">;
+  
 const serviceConfig = {
   postgres: {
     icon: Database,
@@ -34,26 +56,32 @@ const serviceConfig = {
     icon: Database,
     color: "text-zinc-400",
   },
-};
+} satisfies Record<
+  ServiceType,
+  {
+    icon: typeof Database;
+    color: string;
+  }
+>;
 
 export function ServiceNode({
   data,
-}: NodeProps<any>) {
+}: NodeProps<ServiceNodeType>) {
   const [activeTab, setActiveTab] = useState<
     "CPU" | "Memory" | "Disk" | "Region"
   >(data.resource ?? "CPU");
 
   const [values, setValues] = useState({
-    CPU: data.resource === "CPU" ? data.value : 0.02,
+    CPU: data.resource === "CPU" ? data.value : 1,
     Memory:
       data.resource === "Memory"
         ? data.value
-        : 0.05,
+        : 8,
 
     Disk:
       data.resource === "Disk"
         ? data.value
-        : 10,
+        : 100,
 
     Region:
       data.resource === "Region"
@@ -69,28 +97,28 @@ export function ServiceNode({
 
   const tabs = [
     {
-      key: "CPU",
+      key: "CPU" as const,
       icon: Cpu,
       max: 10,
       step: 1,
     },
 
     {
-      key: "Memory",
+      key: "Memory" as const,
       icon: MemoryStick,
       max: 128,
       step: 1,
     },
 
     {
-      key: "Disk",
+      key: "Disk" as const,
       icon: HardDrive,
       max: 1000,
       step: 10,
     },
 
     {
-      key: "Region",
+      key: "Region" as const,
       icon: Database,
       max: 10,
       step: 1,
@@ -103,7 +131,6 @@ export function ServiceNode({
 
   const value = values[activeTab];
 
-
   const updateValue = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -115,25 +142,27 @@ export function ServiceNode({
     }));
   };
 
-  const statusColor = {
-    Success:
-      "bg-green-900 text-green-400 border border-green-700",
+  const statusColor: Record<
+  ServiceStatus,
+  string
+> = {
+  Success:
+    "bg-green-900 text-green-400 border border-green-700",
 
-    degraded:
-      "bg-yellow-900 text-yellow-400 border border-yellow-700",
+  degraded:
+    "bg-yellow-900 text-yellow-400 border border-yellow-700",
 
-    Error:
-      "bg-red-900 text-red-400 border border-red-700",
-  };
+  Error:
+    "bg-red-900 text-red-400 border border-red-700",
+};
 
   const percentage = Math.min(
-  (value / currentTab.max) * 100,
-  100
-);
+    (value / currentTab.max) * 100,
+    100
+  );
 
   return (
     <>
-     
       <Handle
         type="target"
         position={Position.Left}
@@ -156,8 +185,7 @@ export function ServiceNode({
 
           <div className="flex items-center gap-2">
             <div className="border border-green-700 text-green-500 px-3 py-1 rounded-lg text-sm">
-              $
-              {data.pricePerHour.toFixed(2)}
+              ${data.pricePerHour.toFixed(2)}
               /HR
             </div>
 
@@ -209,7 +237,6 @@ export function ServiceNode({
           </div>
         </div>
 
-     
         <div className="flex mt-6 bg-[#0b1630] rounded-xl p-1">
           {tabs.map((tab) => {
             const Icon = tab.icon;
@@ -218,72 +245,55 @@ export function ServiceNode({
               <button
                 key={tab.key}
                 onClick={() =>
-                  setActiveTab(
-                    tab.key as
-                      | "CPU"
-                      | "Memory"
-                      | "Disk"
-                      | "Region"
-                  )
+                  setActiveTab(tab.key)
                 }
-                className={`flex items-center gap-3 px-2 py-2 rounded-lg text-sm transition-all
-                  ${
-                    activeTab === tab.key
-                      ? "bg-white text-black"
-                      : "text-zinc-300"
-                  }`}
+                className={`flex items-center gap-3 px-2 py-2 rounded-lg text-sm transition-all ${
+                  activeTab === tab.key
+                    ? "bg-white text-black"
+                    : "text-zinc-300"
+                }`}
               >
                 <Icon size={14} />
-
                 {tab.key}
               </button>
             );
           })}
         </div>
 
-        {/* SLIDER */}
         <div className="mt-6 flex items-center gap-3">
-  <div className="relative flex-1 h-3">
-    
-    
-    <div className="absolute inset-0 bg-zinc-700 rounded-full" />
+          <div className="relative flex-1 h-3">
+            <div className="absolute inset-0 bg-zinc-700 rounded-full" />
 
-    {/* Filled Track */}
-    <div
-      className="absolute left-0 top-0 h-full rounded-full"
-      style={{
-        width: `${percentage}%`,
-        background:
-          "linear-gradient(to right,#2563eb,#22c55e,#f97316,#ef4444)",
-      }}
-    />
+            <div
+              className="absolute left-0 top-0 h-full rounded-full"
+              style={{
+                width: `${percentage}%`,
+                background:
+                  "linear-gradient(to right,#2563eb,#22c55e,#f97316,#ef4444)",
+              }}
+            />
 
-    {/* Slider */}
-    <input
-      type="range"
-      min={0}
-      max={currentTab.max}
-      step={currentTab.step}
-      value={value}
-      onChange={updateValue}
-      className="slider absolute inset-0 w-full h-full"
-    />
-  </div>
+            <input
+              type="range"
+              min={0}
+              max={currentTab.max}
+              step={currentTab.step}
+              value={value}
+              onChange={updateValue}
+              className="slider absolute inset-0 w-full h-full"
+            />
+          </div>
 
-  <div className="w-20 border border-zinc-700 rounded-lg py-2 text-center">
-    {value}
-  </div>
-</div>
+          <div className="w-20 border border-zinc-700 rounded-lg py-2 text-center">
+            {value}
+          </div>
+        </div>
 
-        {/* FOOTER */}
         <div className="flex items-center justify-between mt-6">
           <div
-            className={`px-3 py-2 rounded-lg text-sm font-medium
-              ${
-                statusColor[
-                  data.status
-                ]
-              }`}
+            className={`px-3 py-2 rounded-lg text-sm font-medium ${
+              statusColor[data.status]
+            }`}
           >
             {data.status}
           </div>
@@ -293,13 +303,11 @@ export function ServiceNode({
           </div>
         </div>
 
-        {/* DESCRIPTION */}
         <div className="mt-4 text-xs text-zinc-500">
           {data.description}
         </div>
       </div>
 
-      {/* OUTPUT */}
       <Handle
         type="source"
         position={Position.Right}

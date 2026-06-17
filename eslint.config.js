@@ -9,6 +9,11 @@ export default defineConfig([
   globalIgnores(['dist']),
   {
     files: ['**/*.{ts,tsx}'],
+    rules: {
+			"prefer-const": "warn",
+			"no-constant-binary-expression": "error",
+      "no-unused-vars": "off",
+		},
     extends: [
       js.configs.recommended,
       tseslint.configs.recommended,

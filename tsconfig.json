@@ -3,7 +3,9 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"]
-    }
+    },
+    "rootDir": "./src",
+    "outDir": "./dist"
   },
   "files": [],
   "references": [

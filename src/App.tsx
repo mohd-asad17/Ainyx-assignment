@@ -11,6 +11,7 @@ import {
   type Node,
   type Edge,
 } from "@xyflow/react";
+import type { NodeTypes } from "@xyflow/react";
 
 import "@xyflow/react/dist/style.css";
 
@@ -22,7 +23,7 @@ import { Tools } from "./components/Layout/Tools";
 
 import { ServiceNode } from "./components/Canvas/ServiceNode";
 
-const nodeTypes = {
+const nodeTypes: NodeTypes = {
   service: ServiceNode,
 };
 
@@ -48,7 +49,7 @@ export default function App() {
         if (data.length > 0) {
           setSelectedApp(data[0]);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error(err);
       }
     }
@@ -59,13 +60,15 @@ export default function App() {
   
   useEffect(() => {
     if (!selectedApp) return;
-
+  
+    const appId = selectedApp.id;
+  
     async function loadGraph() {
       try {
         setLoading(true);
-
-        const graph = await getAppGraph(selectedApp.id);
-
+  
+        const graph = await getAppGraph(appId);
+  
         setNodes(graph.nodes);
         // setEdges(graph.edges);
       } catch (err) {
@@ -74,7 +77,7 @@ export default function App() {
         setLoading(false);
       }
     }
-
+  
     loadGraph();
   }, [selectedApp]);
 
@@ -120,7 +123,7 @@ export default function App() {
         data: {
           label: labels[service],
           service,
-          status: "healthy",
+          status: "Success",
           value: 32,
           resource: "CPU",
           pricePerHour: 0.03,
